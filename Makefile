@@ -1,6 +1,6 @@
 CXX = g++
 CFLAGS = -std=c++14 -O2 -Wall -g 
-LIBS = -lrt -lpthread
+LIBS = /opt/etherlab/lib/libethercat.a -lrt -lpthread -lm
 CLEANFILES = core core.* *.core *.o temp.* *.out typescript* \
 		*.lc *.lh *.bsdi *.sparc *.uw
 

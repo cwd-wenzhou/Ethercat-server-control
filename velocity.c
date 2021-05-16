@@ -9,6 +9,7 @@ int main(int argc, char **argv)
         return 1;
     }
     int velocity_=atoi(argv[1]);
+    
     printf("velocity=%d\n",velocity_);
     printf("*It's working now*\n");
     motor.powerBusy=1;

@@ -1,3 +1,8 @@
+/*
+ * @Author       : cwd
+ * @Date         : 2021-5-10
+ * @Place  : hust
+ */
 #ifndef  HEADER_H
 #define HEADER_H
 
@@ -225,6 +230,11 @@ void State_Machine(struct MOTOR *motor){
         }
 }
 
+bool Is_Serevr_On(struct MOTOR *motor){
+    if  (motor->driveState == dsOperationEnabled && motor->powerBusy==false)
+        return true;
+    return false;
+}
 void Homing(struct MOTOR *motor){
     if(motor->driveState == dsOperationEnabled && motor->resetBusy == 0 &&
         motor->powerBusy == 0 && motor->quickStopBusy == 0) {
@@ -289,8 +299,8 @@ void Position(struct MOTOR *motor,int position_){
             } else if(motor->currentPosition == position_) {
                 motor->homeBusy = false;  
             }
-            EC_WRITE_S32(motor->domain_pd + motor->drive_variables.target_postion,
-                            motor->targetPosition);
+            // EC_WRITE_S32(motor->domain_pd + motor->drive_variables.target_postion,
+            //                 motor->targetPosition);
         }
         else {
             /*

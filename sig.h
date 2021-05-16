@@ -15,11 +15,6 @@
 #include <assert.h>
 #include "log/log.h"
 
-void close_sig_handler(int sig){
-    printf("========== SERVER CLOSED ==========\n");
-    Log_Info("========== SERVER CLOSED ==========");
-    exit(0);
-}
 
 void addsig(int sig,void (*handler)(int) )
 {
