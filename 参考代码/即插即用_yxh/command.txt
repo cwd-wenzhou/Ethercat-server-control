@@ -1,0 +1,8 @@
+gcc -O2  motor_control.c   /opt/etherlab/lib/libethercat.a -lrt -lm  -lpthread -D_GNU_SOURCE -o motor_control
+
+
+shell脚本文件权限设置
+sudo chmod +x test.sh
+
+motor_control.c实现了对enp1s31f6网卡（无静态ip的伺服驱动连接网卡）的插入检测，插入即发送POST请求，请求注册。
+2021.04.02

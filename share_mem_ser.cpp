@@ -1,3 +1,13 @@
+/*
+ * @Author       : cwd
+ * @Date         : 2021-5-16
+ * @Place  : hust
+ * 基于共享内存，作为ethercat主站
+ *      1。给电机使能
+ *      2。循环读取电机的过程数据
+ *      3。将过程数据写道共享内存里，把共享内存里的数据发给从站
+ * 
+ */
 #include <iostream>
 #include <sys/mman.h>
 #include <sys/stat.h>        /* For mode constants */
