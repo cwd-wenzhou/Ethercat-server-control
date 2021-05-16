@@ -20,12 +20,15 @@
 #include "init.h"
 using namespace std;
 
+#define LOG
 struct MOTOR  *motor;
 void close_sig_handler(int sig){
     
     ecrt_master_deactivate(motor->master);
     printf("========== SERVER CLOSED ==========\n");
-    Log_Info("========== SERVER CLOSED ==========");
+    #ifdef LOG
+        Log_Info("========== SERVER CLOSED ==========");
+    #endif
     exit(0);
 }
 
@@ -39,24 +42,25 @@ int main(int argc, char const *argv[])
     ftruncate(shmfd,sizeof(struct MOTOR));
     close(shmfd);
 
-    //log的初始化设置
-    int openLog = 1;
-    int logLevel = 0;
-    int logQueSize =5;
-    //若开启log，那么开始记录
-    if (openLog){
-            Log::Instance()->Init(logLevel,"./logfile","server_control.log",logQueSize);
-            Log_Info("========== Server init ==========");
-            Log_Info("LogSys level: %d", logLevel);
-    }
-    Log::Instance()->flush();
 
+    //若开启log，那么开始记录
+    #ifdef LOG    
+        //log的初始化设置
+        int logLevel = 0;
+        int logQueSize =5;
+        Log::Instance()->Init(logLevel,"./logfile","server_control.log",logQueSize);
+        Log_Info("========== Server init ==========");
+        Log_Info("LogSys level: %d", logLevel);
+        Log::Instance()->flush();
+        int count = 0;      //LOG计数用,避免打出太多log
+    #endif
+    
     printf("*It's working now*\n");
     motor->powerBusy=1;
     motor->opModeSet = 8;         //位置模式
     init_EtherCAT_master(motor);
 
-    int count = 0;      //控制台计数用
+
     int powerup=false;
     while (true){
         usleep(1000);
@@ -83,19 +87,23 @@ int main(int argc, char const *argv[])
 
         Status_Check(motor->status,&motor->driveState);//状态机模式将state置到operationEnable
         
-        State_Machine(motor);//使能状态机   
+        State_Machine(motor);//使能状态机 
 
-        count++;
-        if (count>1000){
-            count=0;
-            Status_Check_printf(motor->status);
-            Log_Info_All(*motor);
-        }
-        if (Is_Serevr_On(motor) && !powerup)
-        {
-            powerup = true;
-            Log_Info("========== Server Power up ==========")
-        }
+        #ifdef LOG
+            count++;
+            if (count>1000){
+                count=0;
+                Log_Info(Status_Check_char(motor->status));
+                Log_Info_All(*motor);
+
+            }
+            if (Is_Serevr_On(motor) && !powerup)
+            {
+                powerup = true;
+                Log_Info("========== Server Power up ==========")
+            }
+        #endif
+
         if (Is_Serevr_On(motor))
         {
             EC_WRITE_S32(motor->domain_pd + motor->drive_variables.target_postion,

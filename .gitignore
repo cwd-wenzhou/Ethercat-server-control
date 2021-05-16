@@ -1,1 +1,4 @@
 /logfile
+share_mem_cli
+share_mem_ser
+*.o

@@ -95,18 +95,6 @@ struct MOTOR {
     bool positionMoving;  //位置模式下运动
 };
 
-struct MOTOR_DATA{
-    //关于电机控制的私有变量
-    bool powerBusy;       //使能标志位
-    bool resetBusy;       //复位标志位
-    bool quickStopBusy;   //急停标志位
-    bool homeBusy;        //回零标志位
-    bool positionMoving;  //位置模式下运动
-    int32_t currentVelocity;  //电机当前运行速度
-    int32_t currentPosition;  //电机当前位置
-    int32_t targetPosition;   //电机的目标位置
-};
-
 static void
 check_domain_state(ec_domain_t *domain, ec_domain_state_t *domain_state) {
     ec_domain_state_t ds;
@@ -177,6 +165,30 @@ void Status_Check_printf(uint16_t motor_status_){
         
 }
 
+//获取当前驱动器的驱动状态
+const char* Status_Check_char(uint16_t motor_status_){
+    
+    if((motor_status_ & 0x004F) == 0x0000)
+        return "motor.driveState = dsNotReadyToSwitchOn; 初始化 未完成状态\n";
+    else if((motor_status_ & 0x004F) == 0x0040)
+        return "motor.driveState = dsSwitchOnDisabled;  初始化 完成状态\n";
+    else if((motor_status_ & 0x006F) == 0x0021)
+        return "motor.driveState = dsReadyToSwitchOn; 主电路电源OFF状态\n";
+    else if((motor_status_ & 0x006F) == 0x0023)
+        return "motor.driveState = dsSwitchedOn; 伺服OFF/伺服准备\n";
+    else if((motor_status_ & 0x006F) == 0x0027)
+        return "motor.driveState = dsOperationEnabled; 伺服ON\n";
+    else if((motor_status_ & 0x006F) == 0x0007)
+        return "motor.driveState = dsQuickStopActive; 即停止\n";
+    else if((motor_status_ & 0x004F) == 0x000F)
+        return "motor.driveState = dsFaultReactionActive;异常（报警）判断\n";
+    else if((motor_status_ & 0x004F) == 0x0008)
+        return "motor.driveState = dsFault;异常（报警）状态\n";
+    else 
+        return "unknow state\n";
+        
+}
+
 //获取当前驱动器的驱动状态,并修改driverstate
 void Status_Check(uint16_t motor_status_,enum DRIVERSTATE *motor_driveState_){
     
@@ -198,6 +210,7 @@ void Status_Check(uint16_t motor_status_,enum DRIVERSTATE *motor_driveState_){
         *motor_driveState_ = dsFault;  //异常（报警）状态
 }
 
+//状态机，把伺服使能
 void State_Machine(struct MOTOR *motor){
     if(motor->powerBusy == true) {
             switch(motor->driveState) {
@@ -229,85 +242,13 @@ void State_Machine(struct MOTOR *motor){
             }
         }
 }
+
+//判断伺服是否处于使能状态
 bool Is_Serevr_On(struct MOTOR *motor){
     if  (motor->driveState == dsOperationEnabled && motor->powerBusy==false)
         return true;
     return false;
 }
-void Homing(struct MOTOR *motor){
-    if(motor->driveState == dsOperationEnabled && motor->resetBusy == 0 &&
-        motor->powerBusy == 0 && motor->quickStopBusy == 0) {
-        if(motor->homeBusy == true) {  //开始回零
-            // printf("电机实时位置%d\t,电机目标位置%d\n",motor->currentPosition,motor->targetPosition);
-            if(motor->currentPosition > 0) {
-                motor->targetPosition = motor->currentPosition - HOME_STEP;
-                if(motor->targetPosition < 0) {
-                    motor->targetPosition = 0;
-                }
-            } else if(motor->currentPosition < 0) {
-                motor->targetPosition = motor->currentPosition + HOME_STEP;
-                if(motor->targetPosition > 0) {
-                    motor->targetPosition = 0;
-                }
-            } else if(motor->currentPosition == 0) {
-                motor->positionMoving=false;
-            }
-            EC_WRITE_S32(motor->domain_pd + motor->drive_variables.target_postion,
-                            motor->targetPosition);
-        }
-    } 
-}
 
-//速度模式，规定velocity单位为 rad/s
-void Velocity(struct MOTOR *motor,int velocity){
-    motor->targetVelocity=ENCODER_RESOLUTION/2/Pi*velocity;
-    //motor->targetVelocity=velocity;
-    if(motor->driveState == dsOperationEnabled && motor->resetBusy == 0 &&
-        motor->powerBusy == 0 && motor->quickStopBusy == 0 ) {
-        if(motor->opmode == 9) {  
-            //本来就是速度模式
-            EC_WRITE_S32(motor->domain_pd + motor->drive_variables.target_velocity,
-                            motor->targetVelocity);
-        }
-        else {
-            /*
-                todo
-                进到这里说明已经是位置模式了
-                应该要先把电机停下来，然后再置成速度模式
-            */
-        }
-    }
-}
 
-//位置模式，将电机移动到指定位置
-void Position(struct MOTOR *motor,int position_){
-    if(motor->driveState == dsOperationEnabled && motor->resetBusy == 0 &&
-        motor->powerBusy == 0 && motor->quickStopBusy == 0) {
-        //本来就是位置模式    
-        if(motor->opmode == 8) {  
-            if(motor->currentPosition > position_) {
-                motor->targetPosition = motor->currentPosition - HOME_STEP;
-                if(motor->targetPosition < position_) {
-                    motor->targetPosition = position_;
-                }
-            } else if(motor->currentPosition < position_) {
-                motor->targetPosition = motor->currentPosition + HOME_STEP;
-                if(motor->targetPosition > position_) {
-                    motor->targetPosition = position_;
-                }
-            } else if(motor->currentPosition == position_) {
-                motor->homeBusy = false;  
-            }
-            // EC_WRITE_S32(motor->domain_pd + motor->drive_variables.target_postion,
-            //                 motor->targetPosition);
-        }
-        else {
-            /*
-                todo
-                进到这里说明已经是速度模式了
-                应该要先把电机停下来，然后再置成位置模式
-            */
-        }
-    } 
-}
 #endif
