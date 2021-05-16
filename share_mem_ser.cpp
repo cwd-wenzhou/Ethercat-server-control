@@ -21,11 +21,6 @@ void close_sig_handler(int sig){
 
 int main(int argc, char const *argv[])
 {
-    //log的初始化设置
-    int openLog = 1;
-    int logLevel = 0;
-    int logQueSize =5;
-
     addsig(SIGINT,close_sig_handler);//ctrl+c的函数设置
 
     //共享内存初始化设置
@@ -34,21 +29,25 @@ int main(int argc, char const *argv[])
     ftruncate(shmfd,sizeof(struct MOTOR));
     close(shmfd);
 
+    //log的初始化设置
+    int openLog = 1;
+    int logLevel = 0;
+    int logQueSize =5;
     //若开启log，那么开始记录
     if (openLog){
-            Log::Instance()->Init(logLevel,"./logfile","server_control.log",5);
+            Log::Instance()->Init(logLevel,"./logfile","server_control.log",logQueSize);
             Log_Info("========== Server init ==========");
             Log_Info("LogSys level: %d", logLevel);
     }
     Log::Instance()->flush();
 
-    //struct MOTOR motor; 
     printf("*It's working now*\n");
     motor->powerBusy=1;
     motor->opModeSet = 8;         //位置模式
     init_EtherCAT_master(motor);
 
     int count = 0;      //控制台计数用
+    int powerup=false;
     while (true){
         usleep(1000);
         //接收过程数据
@@ -82,10 +81,19 @@ int main(int argc, char const *argv[])
             Status_Check_printf(motor->status);
             Log_Info_All(*motor);
         }
-        if (Is_Serevr_On)
+        if (Is_Serevr_On(motor) && !powerup)
+        {
+            powerup = true;
+            Log_Info("========== Server Power up ==========")
+        }
+        if (Is_Serevr_On(motor))
         {
             EC_WRITE_S32(motor->domain_pd + motor->drive_variables.target_postion,
-            motor->targetPosition);
+                motor->targetPosition);
+
+            EC_WRITE_S32(motor->domain_pd + motor->drive_variables.target_velocity,
+                motor->targetVelocity);
+
         }
         
         //发送过程数据

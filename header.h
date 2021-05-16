@@ -229,7 +229,6 @@ void State_Machine(struct MOTOR *motor){
             }
         }
 }
-
 bool Is_Serevr_On(struct MOTOR *motor){
     if  (motor->driveState == dsOperationEnabled && motor->powerBusy==false)
         return true;
