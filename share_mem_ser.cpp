@@ -22,14 +22,9 @@ using namespace std;
 
 #define LOG
 struct MOTOR  *motor;
+bool running;
 void close_sig_handler(int sig){
-    
-    ecrt_master_deactivate(motor->master);
-    printf("========== SERVER CLOSED ==========\n");
-    #ifdef LOG
-        Log_Info("========== SERVER CLOSED ==========");
-    #endif
-    exit(0);
+    running = false;
 }
 
 int main(int argc, char const *argv[])
@@ -55,6 +50,7 @@ int main(int argc, char const *argv[])
         int count = 0;      //LOG计数用,避免打出太多log
     #endif
     
+    running = true;
     printf("*It's working now*\n");
     motor->powerBusy=1;
     motor->opModeSet = 8;         //位置模式
@@ -62,7 +58,7 @@ int main(int argc, char const *argv[])
 
 
     int powerup=false;
-    while (true){
+    while (running){
         usleep(1000);
         //接收过程数据
         ecrt_master_receive(motor->master);
@@ -119,7 +115,12 @@ int main(int argc, char const *argv[])
         ecrt_master_send(motor->master);
     }
     
-    
+    //ecrt_master_deactivate(motor->master);
+    ecrt_release_master(motor->master);
+    printf("========== SERVER CLOSED ==========\n");
+    #ifdef LOG
+        Log_Info("========== SERVER CLOSED ==========");
+    #endif
     return 0;
 }
 

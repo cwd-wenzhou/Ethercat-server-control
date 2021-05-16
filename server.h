@@ -15,6 +15,7 @@ void Homing(struct MOTOR *motor){
     motor->positionMoving = true;//开始运动
     while(motor->positionMoving)
     {
+        usleep(1000);
         if(motor->driveState == dsOperationEnabled && motor->resetBusy == 0 &&
         motor->powerBusy == 0 && motor->quickStopBusy == 0) {
             if(motor->homeBusy == true) {  //开始回零
@@ -67,6 +68,7 @@ void Position(struct MOTOR *motor,int position_){
     motor->positionMoving = true;//开始运动
     while(motor->positionMoving)
     {
+        usleep(1000);
         if(motor->driveState == dsOperationEnabled && motor->resetBusy == 0 &&
         motor->powerBusy == 0 && motor->quickStopBusy == 0) {
             //本来就是位置模式    

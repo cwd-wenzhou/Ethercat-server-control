@@ -25,39 +25,52 @@
 #include "header.h"
 #include "server.h"
 using namespace std;
-int main(int argc, char const *argv[])
+int main(int argc, char *argv[])
 {
     struct MOTOR  *motor;
     int shmfd = shm_open(SHM_NAME, O_RDWR  ,SHM_MODE);
     motor = (struct MOTOR* )mmap(NULL,sizeof(struct MOTOR),PROT_READ | PROT_WRITE,MAP_SHARED,shmfd,0);
     close(shmfd);
 
-    //printf("that't all\n");
     if (argc<2){
-        printf("put in position(0~%d)\n",ENCODER_RESOLUTION);
+        printf("./share_men_cli  <command> <arg>");
         return 1;
     }
-    int position_=atoi(argv[1]);
+
+    printf("waiting server on\n");
+    while (!Is_Serevr_On){}
     printf("*It's working now*\n");
 
-    char* cmd;
-    int arg;
-    while (true){
-        usleep(1000);
-        if (!Is_Serevr_On) 
-            continue;
-        cin>>cmd>>arg;
-        switch (cmd)
+    int c = getopt(argc,argv,"h:p:v:");
+    int position_,velocity_;
+    switch (c)
+    {
+    case 'h':
+        Homing(motor);
+        break;
+    case 'p':
+        if (argc<3)
         {
-        case "-h":
-            /* code */
+            printf("put in position(0~%d)\n",ENCODER_RESOLUTION);
             break;
-        
-        default:
-            break;
-        }               
-            
+        }
+        position_=atoi(argv[2]);    
         Position(motor,position_);
+        break;
+    case 'v':
+        if (argc<3)
+        {
+            printf("put in velocity(rad/s)\n");
+            break;
+        }
+        velocity_=atoi(argv[2]); 
+        Velocity(motor,velocity_);
+        break;
+    default:
+        printf("./share_men_cli  <command> <arg>\n");
+        break;
     }
+
+    printf("done\n");
     return 0;
 }
