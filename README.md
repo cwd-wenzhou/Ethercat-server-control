@@ -19,11 +19,10 @@ Starting EtherCAT master 1.5.2  done
 # 编译语句
 
 编译单独c文件
-gcc -O2  xxxx.c   /opt/etherlab/lib/libethercat.a -lrt -lm  -lpthread -D_GNU_SOURCE -o xxx
+`gcc -O2  xxxx.c   /opt/etherlab/lib/libethercat.a -lrt -lm  -lpthread -D_GNU_SOURCE -o xxx`
 
 编译share_men_cli 与share_men_ser
-make
-
+`make`
 
 # 程序用途
 
@@ -42,6 +41,7 @@ position.c
 
 velocity.c
 速度模式.
+
 
 
 
