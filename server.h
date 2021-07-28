@@ -7,7 +7,7 @@
 #ifndef SERVER_H
 #define SERVER_H
 
-#include "header.h"
+#include "motor.h"
 
 //回零函数
 void Homing(struct MOTOR *motor){

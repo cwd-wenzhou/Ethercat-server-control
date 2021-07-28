@@ -5,7 +5,7 @@ CLEANFILES = core core.* *.core *.o temp.* *.out typescript* \
 		*.lc *.lh *.bsdi *.sparc *.uw
 
 PROGS = share_mem_ser  share_mem_cli 
-OBJS =  ./buffer/*.cpp ./log/*.cpp
+OBJS =  ./buffer/*.cpp  ./log/*.cpp  ./init.cpp ./motor.cpp
 
 all: $(PROGS)
 	

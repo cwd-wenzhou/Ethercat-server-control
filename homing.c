@@ -1,6 +1,6 @@
 #include "header.h"
 #include "init.h"
-
+#include "motor.h"
 int main(int argc, char **argv) 
 {
     struct MOTOR motor; 

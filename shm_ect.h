@@ -6,7 +6,7 @@
 #include <unistd.h>
 #include <stdint.h>
 #include "log/log.h"
-#include "header.h"
+#include "motor.h"
 
 // struct shm_ect_data {		/* struct stored in shared memory */
 

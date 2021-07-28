@@ -22,7 +22,7 @@
 #include <fcntl.h>              /* For O_* constants */
 #include <unistd.h>
 #include "shm_ect.h"
-#include "header.h"
+#include "motor.h"
 #include "server.h"
 using namespace std;
 int main(int argc, char *argv[])

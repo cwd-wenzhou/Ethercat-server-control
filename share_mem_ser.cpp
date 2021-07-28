@@ -16,11 +16,11 @@
 #include "shm_ect.h"
 #include "log/log.h"
 #include "sig.h"
-#include "header.h"
+#include "motor.h"
 #include "init.h"
 using namespace std;
 
-#define LOG
+//#define LOG
 struct MOTOR  *motor;
 bool running;
 void close_sig_handler(int sig){
@@ -54,20 +54,21 @@ int main(int argc, char const *argv[])
     printf("*It's working now*\n");
     motor->powerBusy=1;
     motor->opModeSet = 8;         //位置模式
-    init_EtherCAT_master(motor);
+
+    ec_master_t *master;
+    master=init_EtherCAT_master(motor);
 
 
     int powerup=false;
     while (running){
         usleep(1000);
         //接收过程数据
-        ecrt_master_receive(motor->master);
+        ecrt_master_receive(master);
         ecrt_domain_process(motor->domain);
-
         //检查过程数据状态（可选）
         check_domain_state(motor->domain, &motor->domain_state);
         //检查主站状态
-        check_master_state(motor->master, &motor->master_state);
+        //check_master_state(master, &motor->master_state);
         //检查从站配置状态
         check_slave_config_states(motor->maxsine_EP3E, &motor->maxsine_EP3E_state);
         
@@ -112,11 +113,11 @@ int main(int argc, char const *argv[])
         
         //发送过程数据
         ecrt_domain_queue(motor->domain);
-        ecrt_master_send(motor->master);
+        ecrt_master_send(master);
     }
     
     //ecrt_master_deactivate(motor->master);
-    ecrt_release_master(motor->master);
+    ecrt_release_master(master);
     printf("========== SERVER CLOSED ==========\n");
     #ifdef LOG
         Log_Info("========== SERVER CLOSED ==========");
