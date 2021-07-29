@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<EtherCATInfo xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="EtherCATInfo.xsd" Version="1.2">
+  <Vendor>
+  </Vendor>
+  <Descriptions>
+    <Groups>
+    </Groups>
+    <Devices>
+      <Device Physics="YY">
+        <Type ProductCode="#x13926034" RevisionNo="#x00101B82" TcSmClass="CX5000">CX5010 EtherCAT slave</Type>
+        <Name LcId="1033">CX5010 EtherCAT slave</Name>
+        <Name LcId="1031">CX5010 EtherCAT slave</Name>
+        <RxPdo Mandatory="1" Sm="2" Virtual="1">
+          <Index>#x1600</Index>
+          <Name>IO Outputs</Name>
+        </RxPdo>
+        <RxPdo Mandatory="1" Sm="2" Virtual="1">
+          <Index>#x1600</Index>
+          <Name>IO Outputs</Name>
+        </RxPdo>
+        <TxPdo Mandatory="1" Sm="3" Virtual="1">
+          <Index>#x1a00</Index>
+          <Name>IO Inputs</Name>
+        </TxPdo>
+        <TxPdo Mandatory="1" Sm="3" Virtual="1">
+          <Index>#x1a00</Index>
+          <Name>IO Inputs</Name>
+        </TxPdo>
+        <TxPdo Mandatory="1" Sm="3" Fixed="1">
+          <Index>#x1a80</Index>
+          <Name>Device Status Mapping</Name>
+          <Entry>
+            <Index>#xf100</Index>
+            <SubIndex>13</SubIndex>
+            <BitLen>1</BitLen>
+            <Name>TxPdoState</Name>
+            <DataType>BOOL</DataType>
+          </Entry>
+          <Entry>
+            <Index>#xf101</Index>
+            <SubIndex>14</SubIndex>
+            <BitLen>1</BitLen>
+            <Name>TxPdoState</Name>
+            <DataType>BOOL</DataType>
+          </Entry>
+          <Entry>
+            <Index>#xf102</Index>
+            <SubIndex>15</SubIndex>
+            <BitLen>1</BitLen>
+            <Name>TxPdoState</Name>
+            <DataType>BOOL</DataType>
+          </Entry>
+          <Entry>
+            <Index>#xf103</Index>
+            <SubIndex>16</SubIndex>
+            <BitLen>1</BitLen>
+            <Name>TxPdoToggle</Name>
+            <DataType>BOOL</DataType>
+          </Entry>
+        </TxPdo>
+      </Device>
+    </Devices>
+  </Descriptions>
+</EtherCATInfo>

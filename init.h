@@ -16,7 +16,7 @@
 #include <stdio.h>
 
 //从站配置所用的参数
-#define EP3ESLAVEPOS 0, 0               //迈信伺服EP3E在ethercat总线上的位置
+#define EP3ESLAVEPOS 0            //迈信伺服EP3E在ethercat总线上的位置
 #define MAXSINE 0x000007DD, 0x00000001  // EP3E的厂家标识和产品标识
 
 // CoE对象字典
