@@ -1,7 +1,14 @@
 #include "init.h"
-ec_master_t * init_EtherCAT_master(struct MOTOR *motor ,int SERVER_NUM) {
+ec_master_t * init_EtherCAT_master(struct MOTOR *motor ) {
+    printf("in init function\n");
     //创建ethercat主站master
     ec_master_t * master=ecrt_request_master(0);
+    ec_master_info_t *master_info= new ec_master_info_t;
+    printf("ecrt_request_master done\n");
+    ecrt_master(master,master_info);//获取主站信息
+    int SERVER_NUM = master_info->slave_count;
+    printf("there are %d servers\n",SERVER_NUM);
+
     if(!master) {
         printf("Failed to create ethercat master!\n");
         exit(EXIT_FAILURE);  //创建失败，退出线程
@@ -19,9 +26,9 @@ ec_master_t * init_EtherCAT_master(struct MOTOR *motor ,int SERVER_NUM) {
             {EP3ESLAVEPOS,i,MAXSINE, TARGET_VELOCITY, 0,&(motor+i)->drive_variables.target_velocity},
             {EP3ESLAVEPOS,i,MAXSINE, TARGET_POSITION, 0,&(motor+i)->drive_variables.target_postion},
             {EP3ESLAVEPOS,i,MAXSINE, STATUS_WORD, 0, &(motor+i)->drive_variables.status_word},
-            {EP3ESLAVEPOS,i, MAXSINE, MODE_DISPLAY, 0, &(motor+i)->drive_variables.mode_display},
+            {EP3ESLAVEPOS,i,MAXSINE, MODE_DISPLAY, 0, &(motor+i)->drive_variables.mode_display},
             {EP3ESLAVEPOS,i,MAXSINE, CURRENT_VELOCITY, 0,&(motor+i)->drive_variables.current_velocity},
-            {EP3ESLAVEPOS,i, MAXSINE, CURRENT_POSITION, 0,&(motor+i)->drive_variables.current_postion},
+            {EP3ESLAVEPOS,i,MAXSINE, CURRENT_POSITION, 0,&(motor+i)->drive_variables.current_postion},
             {}};
 
         //填充相关PDOS信息
