@@ -37,6 +37,14 @@
 
 #define MAX_TORQUE  0x6072   //最大力矩的数据对象
 
+//从站配置所用的参数
+#define EP3ESLAVEPOS 0              //迈信伺服EP3E在ethercat总线上的位置
+#define MAXSINE 0x000007DD, 0x00000001  // EP3E的厂家标识和产品标识
+
+// CoE对象字典
+#define RXPDO 0x1600
+#define TXPDO 0x1A00
+
 //伺服驱动器里PDO入口的偏移量
 /*我们需要定义一些变量去关联需要用到的从站的PD0对象*/
 struct DRIVERVARIABLE {
@@ -112,4 +120,10 @@ void State_Machine(struct MOTOR *motor);
 //判断伺服是否处于使能状态
 bool Is_Serevr_On(struct MOTOR *motor);
 
+//填充相关PDOS信息
+extern ec_pdo_entry_info_t EP3E_pdo_entries[9];
+extern ec_pdo_info_t EP3E_pdos[2];
+extern ec_sync_info_t EP3E_syncs[5];
+
+ec_pdo_entry_reg_t *domain_MOTOR_regs(uint16_t i,struct MOTOR* motor);
 #endif //MOTOR_def

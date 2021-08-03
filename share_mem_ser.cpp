@@ -57,19 +57,19 @@ int main(int argc, char const *argv[])
 
 
     ec_master_t *master;
-    master=init_EtherCAT_master(motor);
+    master = init_EtherCAT_master(motor);
 
     ec_master_info_t *master_info= new ec_master_info_t;
     printf("ecrt_request_master done\n");
     ecrt_master(master,master_info);//获取主站信息
     int SERVER_NUM = master_info->slave_count;
+
     for (int i=0;i<SERVER_NUM;i++){
         motor[i].targetPosition = 0;
         motor[i].opModeSet = 8;     //位置模式
         motor[i].homeBusy = true;
         motor[i].powerBusy = true;
     }
-
     int powerup=false;
     while (running){
         usleep(1000);

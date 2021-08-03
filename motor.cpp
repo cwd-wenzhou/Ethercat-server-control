@@ -1,5 +1,41 @@
 #include "motor.h"
 
+ec_pdo_entry_info_t EP3E_pdo_entries[] = {/*RxPdo 0x1600*/
+                                    {CTRL_WORD, 0x00, 16},
+                                    {OPERATION_MODE, 0x00, 8},
+                                    {TARGET_VELOCITY, 0x00, 32},
+                                    {TARGET_POSITION, 0x00, 32},
+                                    /*TxPdo 0x1A00*/
+                                    {STATUS_WORD, 0x00, 16},
+                                    {MODE_DISPLAY, 0x00, 8},
+                                    {CURRENT_VELOCITY, 0x00, 32},
+                                    {CURRENT_POSITION, 0x00, 32}};
+ec_pdo_info_t EP3E_pdos[] = {// RxPdo
+                        {RXPDO, 4, EP3E_pdo_entries + 0},
+                        // TxPdo
+                        {TXPDO, 4, EP3E_pdo_entries + 4}};
+ec_sync_info_t EP3E_syncs[] = {{0, EC_DIR_OUTPUT, 0, NULL, EC_WD_DISABLE},
+                        {1, EC_DIR_INPUT, 0, NULL, EC_WD_DISABLE},
+                        {2, EC_DIR_OUTPUT, 1, EP3E_pdos + 0, EC_WD_DISABLE},
+                        {3, EC_DIR_INPUT, 1, EP3E_pdos + 1, EC_WD_DISABLE},
+                        {0xFF}};
+
+ec_pdo_entry_reg_t *domain_MOTOR_regs(uint16_t i,struct MOTOR* motor){
+    ec_pdo_entry_reg_t*  ans= new ec_pdo_entry_reg_t[9]{
+        {EP3ESLAVEPOS,i,MAXSINE, CTRL_WORD, 0, &(motor+i)->drive_variables.ctrl_word},
+        {EP3ESLAVEPOS,i,MAXSINE, OPERATION_MODE, 0,&(motor+i)->drive_variables.operation_mode},
+        {EP3ESLAVEPOS,i,MAXSINE, TARGET_VELOCITY, 0,&(motor+i)->drive_variables.target_velocity},
+        {EP3ESLAVEPOS,i,MAXSINE, TARGET_POSITION, 0,&(motor+i)->drive_variables.target_postion},
+        {EP3ESLAVEPOS,i,MAXSINE, STATUS_WORD, 0, &(motor+i)->drive_variables.status_word},
+        {EP3ESLAVEPOS,i,MAXSINE, MODE_DISPLAY, 0, &(motor+i)->drive_variables.mode_display},
+        {EP3ESLAVEPOS,i,MAXSINE, CURRENT_VELOCITY, 0,&(motor+i)->drive_variables.current_velocity},
+        {EP3ESLAVEPOS,i,MAXSINE, CURRENT_POSITION, 0,&(motor+i)->drive_variables.current_postion},
+        {}
+    };
+    return ans;
+}
+
+
 //驱动器状态打印函数
 //获取当前驱动器的驱动状态
 const char* Status_Check_char(uint16_t motor_status_){
