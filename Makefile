@@ -1,11 +1,11 @@
 CXX = g++
-CFLAGS = -std=c++14 -O2 -Wall -g 
+CFLAGS = -std=c++14 -O2 -Wall -g -fno-rtti
 LIBS = /opt/etherlab/lib/libethercat.a -lrt -lpthread -lm
 CLEANFILES = core core.* *.core *.o temp.* *.out typescript* \
 		*.lc *.lh *.bsdi *.sparc *.uw
 
 PROGS = share_mem_ser  share_mem_cli 
-OBJS =  ./buffer/*.cpp  ./log/*.cpp  ./init.cpp ./motor.cpp
+OBJS =  ./buffer/*.cpp  ./log/*.cpp ./motor.cpp ./ecmk.cpp ./init.cpp
 
 all: $(PROGS)
 	

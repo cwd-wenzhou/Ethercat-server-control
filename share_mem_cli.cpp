@@ -27,6 +27,7 @@
 using namespace std;
 int main(int argc, char *argv[])
 {
+  
     struct MOTOR  *motor;
     int shmfd = shm_open(SHM_NAME, O_RDWR  ,SHM_MODE);
     motor = (struct MOTOR* )mmap(NULL,sizeof(struct MOTOR),PROT_READ | PROT_WRITE,MAP_SHARED,shmfd,0);

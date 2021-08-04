@@ -18,6 +18,7 @@
 #include "sig.h"
 #include "motor.h"
 #include "init.h"
+#include "ecmk.h"
 using namespace std;
 
 //#define LOG
@@ -38,7 +39,6 @@ int main(int argc, char const *argv[])
     ftruncate(shmfd,1024*sizeof(struct MOTOR));
     close(shmfd);
     */
-    struct MOTOR  motor[10];
 
     //若开启log，那么开始记录
     #ifdef LOG    
@@ -56,48 +56,32 @@ int main(int argc, char const *argv[])
     printf("*It's working now*\n");
 
 
-    ec_master_t *master;
-    master = init_EtherCAT_master(motor);
-
+    //创建ethercat主站master
+    ec_master_t * master = Ecrt_request_master(0);
     ec_master_info_t *master_info= new ec_master_info_t;
     printf("ecrt_request_master done\n");
     ecrt_master(master,master_info);//获取主站信息
-    int SERVER_NUM = master_info->slave_count;
+    int slave_count = master_info->slave_count;//从站个数
+    printf("there are %d slaves\n",slave_count);
+    vector<SLAVE*> slaves(slave_count,nullptr);
 
-    for (int i=0;i<SERVER_NUM;i++){
-        motor[i].targetPosition = 0;
-        motor[i].opModeSet = 8;     //位置模式
-        motor[i].homeBusy = true;
-        motor[i].powerBusy = true;
-    }
+    init_EtherCAT_slaves(master,slaves);
     int powerup=false;
     while (running){
         usleep(1000);
         //接收过程数据
         ecrt_master_receive(master);
-        for (int i=0;i< SERVER_NUM;i++){
+        for (int i=0;i< slave_count;i++){
                 //接收过程数据
-            ecrt_domain_process(motor[i].domain);
+            ecrt_domain_process(slaves[i]->domain);
 
             //检查过程数据状态（可选）
-            check_domain_state(motor[i].domain, &motor[i].domain_state);
+            check_domain_state(slaves[i]->domain, &slaves[i]->domain_state);
             
             //检查从站配置状态
-            check_slave_config_states(motor[i].maxsine_EP3E, &motor[i].maxsine_EP3E_state);
+            check_slave_config_states(slaves[i]->slave, &slaves[i]->slave_state);
 
-            //读取数据
-            motor[i].status =
-                EC_READ_U16(motor[i].domain_pd + motor[i].drive_variables.status_word);  //状态字
-            motor[i].opmode =
-                EC_READ_U8(motor[i].domain_pd + motor[i].drive_variables.mode_display);  //运行模式
-            motor[i].currentVelocity = EC_READ_S32(
-                motor[i].domain_pd + motor[i].drive_variables.current_velocity);  //当前速度
-            motor[i].currentPosition = EC_READ_S32(
-                motor[i].domain_pd + motor[i].drive_variables.current_postion);  //当前位置
-
-            Status_Check(motor[i].status,&motor[i].driveState);//状态机模式将state置到operationEnable
-        
-            State_Machine(&motor[i]);//使能状态机 
+            slaves[i]->read_data();
 
             #ifdef LOG
                 count++;
@@ -114,18 +98,10 @@ int main(int argc, char const *argv[])
                 }
             #endif
 
-            if (Is_Serevr_On(&motor[i]))
-            {
-                EC_WRITE_S32(motor[i].domain_pd + motor[i].drive_variables.target_postion,
-                    motor[i].targetPosition);
-
-                EC_WRITE_S32(motor[i].domain_pd + motor[i].drive_variables.target_velocity,
-                    motor[i].targetVelocity);
-
-            }
+            slaves[i]->send_data();
             
             //发送过程数据
-            ecrt_domain_queue(motor[i].domain);
+            ecrt_domain_queue(slaves[i]->domain);
         }
         ecrt_master_send(master);
     }

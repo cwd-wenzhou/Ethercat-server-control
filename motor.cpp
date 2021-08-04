@@ -20,16 +20,41 @@ ec_sync_info_t EP3E_syncs[] = {{0, EC_DIR_OUTPUT, 0, NULL, EC_WD_DISABLE},
                         {3, EC_DIR_INPUT, 1, EP3E_pdos + 1, EC_WD_DISABLE},
                         {0xFF}};
 
-ec_pdo_entry_reg_t *domain_MOTOR_regs(uint16_t i,struct MOTOR* motor){
+ec_sync_info_t* MOTOR::get_ec_sync_info_t_(){
+    return EP3E_syncs;
+}
+
+void MOTOR::read_data(){
+    this->status = EC_READ_U16(this->domain_pd + this->drive_variables.status_word);  //状态字
+    this->opmode = EC_READ_U8(this->domain_pd + this->drive_variables.mode_display);  //运行模式
+    this->currentVelocity = EC_READ_S32(this->domain_pd + this->drive_variables.current_velocity);  //当前速度
+    this->currentPosition = EC_READ_S32(this->domain_pd + this->drive_variables.current_postion);  //当前位置
+}
+
+void MOTOR::send_data(){
+    Status_Check(this);
+    State_Machine(this);
+    if (Is_Serevr_On(this))
+        {
+            EC_WRITE_S32(this->domain_pd + this->drive_variables.target_postion,
+                this->targetPosition);
+
+            EC_WRITE_S32(this->domain_pd + this->drive_variables.target_velocity,
+                this->targetVelocity);
+
+        }
+}
+
+ec_pdo_entry_reg_t* MOTOR::Domain_regs(uint16_t position){
     ec_pdo_entry_reg_t*  ans= new ec_pdo_entry_reg_t[9]{
-        {EP3ESLAVEPOS,i,MAXSINE, CTRL_WORD, 0, &(motor+i)->drive_variables.ctrl_word},
-        {EP3ESLAVEPOS,i,MAXSINE, OPERATION_MODE, 0,&(motor+i)->drive_variables.operation_mode},
-        {EP3ESLAVEPOS,i,MAXSINE, TARGET_VELOCITY, 0,&(motor+i)->drive_variables.target_velocity},
-        {EP3ESLAVEPOS,i,MAXSINE, TARGET_POSITION, 0,&(motor+i)->drive_variables.target_postion},
-        {EP3ESLAVEPOS,i,MAXSINE, STATUS_WORD, 0, &(motor+i)->drive_variables.status_word},
-        {EP3ESLAVEPOS,i,MAXSINE, MODE_DISPLAY, 0, &(motor+i)->drive_variables.mode_display},
-        {EP3ESLAVEPOS,i,MAXSINE, CURRENT_VELOCITY, 0,&(motor+i)->drive_variables.current_velocity},
-        {EP3ESLAVEPOS,i,MAXSINE, CURRENT_POSITION, 0,&(motor+i)->drive_variables.current_postion},
+        {EP3ESLAVEPOS,position,MAXSINE, CTRL_WORD, 0, &this->drive_variables.ctrl_word},
+        {EP3ESLAVEPOS,position,MAXSINE, OPERATION_MODE, 0,&this->drive_variables.operation_mode},
+        {EP3ESLAVEPOS,position,MAXSINE, TARGET_VELOCITY, 0,&this->drive_variables.target_velocity},
+        {EP3ESLAVEPOS,position,MAXSINE, TARGET_POSITION, 0,&this->drive_variables.target_postion},
+        {EP3ESLAVEPOS,position,MAXSINE, STATUS_WORD, 0, &this->drive_variables.status_word},
+        {EP3ESLAVEPOS,position,MAXSINE, MODE_DISPLAY, 0, &this->drive_variables.mode_display},
+        {EP3ESLAVEPOS,position,MAXSINE, CURRENT_VELOCITY, 0,&this->drive_variables.current_velocity},
+        {EP3ESLAVEPOS,position,MAXSINE, CURRENT_POSITION, 0,&this->drive_variables.current_postion},
         {}
     };
     return ans;
@@ -61,28 +86,30 @@ const char* Status_Check_char(uint16_t motor_status_){
 }
 
 //获取当前驱动器的驱动状态,并修改driverstate
-void Status_Check(uint16_t motor_status_,enum DRIVERSTATE *motor_driveState_){
-    
+void Status_Check(MOTOR *motor){
+    uint16_t motor_status_ = motor->status;
+
     if((motor_status_ & 0x004F) == 0x0000)
-        *motor_driveState_ = dsNotReadyToSwitchOn;  //初始化 未完成状态
+        motor->driveState = dsNotReadyToSwitchOn;  //初始化 未完成状态
     else if((motor_status_ & 0x004F) == 0x0040)
-        *motor_driveState_ = dsSwitchOnDisabled;  //初始化 完成状态
+        motor->driveState = dsSwitchOnDisabled;  //初始化 完成状态
     else if((motor_status_ & 0x006F) == 0x0021)
-        *motor_driveState_ = dsReadyToSwitchOn;  //主电路电源OFF状态
+        motor->driveState = dsReadyToSwitchOn;  //主电路电源OFF状态
     else if((motor_status_ & 0x006F) == 0x0023)
-        *motor_driveState_ = dsSwitchedOn;  //伺服OFF/伺服准备
+        motor->driveState = dsSwitchedOn;  //伺服OFF/伺服准备
     else if((motor_status_ & 0x006F) == 0x0027)
-        *motor_driveState_ = dsOperationEnabled;  //伺服ON
+        motor->driveState = dsOperationEnabled;  //伺服ON
     else if((motor_status_ & 0x006F) == 0x0007)
-        *motor_driveState_ = dsQuickStopActive;  //即停止
+        motor->driveState = dsQuickStopActive;  //即停止
     else if((motor_status_ & 0x004F) == 0x000F)
-        *motor_driveState_ = dsFaultReactionActive;  //异常（报警）判断
-    else if((motor_status_ & 0x004F) == 0x0008)
-        *motor_driveState_ = dsFault;  //异常（报警）状态
+        motor->driveState = dsFaultReactionActive;  //异常（报警）判断
+    else //if((motor_status_ & 0x004F) == 0x0008)
+        motor->driveState = dsFault;  //异常（报警）状态
+
 }
 
 //状态机，把伺服使能
-void State_Machine(struct MOTOR *motor){
+void State_Machine(MOTOR *motor){
     if(motor->powerBusy == true) {
             switch(motor->driveState) {
                 case dsNotReadyToSwitchOn:
@@ -115,8 +142,9 @@ void State_Machine(struct MOTOR *motor){
 }
 
 //判断伺服是否处于使能状态
-bool Is_Serevr_On(struct MOTOR *motor){
+bool Is_Serevr_On(MOTOR *motor){
     if  (motor->driveState == dsOperationEnabled && motor->powerBusy==false)
         return true;
     return false;
 }
+

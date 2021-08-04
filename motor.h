@@ -9,7 +9,7 @@
 #define MOTOR_def
 
 #include <ecrt.h>
-
+#include "slave.h"
 //电机控制基本参数
 #define TASK_FREQUENCY 4000        //*Hz* 任务周期
 #define ENCODER_RESOLUTION 131072  //编码器分辨率
@@ -74,16 +74,14 @@ enum DRIVERSTATE {
 };
 
 //迈信伺服电机结构体
-struct MOTOR {
-    //关于ethercat master
-    //每一个motor一个域
-    ec_domain_t *domain;             //域
-    ec_domain_state_t domain_state;  //域状态
-
-    ec_slave_config_t *maxsine_EP3E;  //从站配置，这里只有一台迈信伺服
-    ec_slave_config_state_t maxsine_EP3E_state;  //从站配置状态
-
-    uint8_t *domain_pd;                     // Process Data
+class MOTOR:public SLAVE {
+public:
+    MOTOR(){
+        targetPosition = 0;
+        opModeSet = 8;     //位置模式
+        homeBusy = true;
+        powerBusy = true;
+    }
     struct DRIVERVARIABLE drive_variables;  //从站驱动器变量
 
     int32_t targetPosition;   //电机的目标位置
@@ -104,26 +102,33 @@ struct MOTOR {
     bool quickStopBusy;   //急停标志位
     bool homeBusy;        //回零标志位
     bool positionMoving;  //位置模式下运动
+
+    void read_data();
+    void send_data();
+    ec_pdo_entry_reg_t *Domain_regs(uint16_t position);
+    ec_sync_info_t* get_ec_sync_info_t_();
+
+    ~MOTOR(){};
 };
 
 
-//驱动器状态打印函数
+
 //获取当前驱动器的驱动状态
 const char* Status_Check_char(uint16_t motor_status_);
 
 //获取当前驱动器的驱动状态,并修改driverstate
-void Status_Check(uint16_t motor_status_,enum DRIVERSTATE *motor_driveState_);
+void Status_Check( MOTOR *motor);
 
 //状态机，把伺服使能
-void State_Machine(struct MOTOR *motor);
+void State_Machine( MOTOR *motor);
 
 //判断伺服是否处于使能状态
-bool Is_Serevr_On(struct MOTOR *motor);
+bool Is_Serevr_On(MOTOR *motor);
 
 //填充相关PDOS信息
 extern ec_pdo_entry_info_t EP3E_pdo_entries[9];
 extern ec_pdo_info_t EP3E_pdos[2];
 extern ec_sync_info_t EP3E_syncs[5];
 
-ec_pdo_entry_reg_t *domain_MOTOR_regs(uint16_t i,struct MOTOR* motor);
+
 #endif //MOTOR_def
