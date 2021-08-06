@@ -10,7 +10,8 @@
 
 #include <ecrt.h>
 #include "slave.h"
-#define ECMKCODE 0x00000001, 0x00000001  // EP3E的厂家标识和产品标识
+#include <stdio.h>
+#define ECMKCODE 0x00000009, 0x00009252  // EP3E的厂家标识和产品标识
 //PDO入口的偏移量
 struct PDO_OFFSET {
     unsigned int CHx_Displacement[4];   //4通道位移值
@@ -37,9 +38,9 @@ public:
     ~ECMK(){};
 };
 
-extern ec_pdo_entry_info_t ECMK_pdo_entries[11];
-extern ec_pdo_info_t ECMK_pdos[3] ;
-extern ec_sync_info_t ECMK_syncs[6];
+extern ec_pdo_entry_info_t ECMK_pdo_entries[43];
+extern ec_pdo_info_t ECMK_pdos[6] ;
+extern ec_sync_info_t ECMK_syncs[5];
 
 
 

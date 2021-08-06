@@ -66,13 +66,14 @@ int main(int argc, char const *argv[])
     vector<SLAVE*> slaves(slave_count,nullptr);
 
     init_EtherCAT_slaves(master,slaves);
+    printf("ethercat master init successed!\n");
     int powerup=false;
     while (running){
         usleep(1000);
         //接收过程数据
         ecrt_master_receive(master);
         for (int i=0;i< slave_count;i++){
-                //接收过程数据
+            //接收过程数据
             ecrt_domain_process(slaves[i]->domain);
 
             //检查过程数据状态（可选）
