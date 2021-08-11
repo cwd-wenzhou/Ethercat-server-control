@@ -47,14 +47,14 @@ void MOTOR::send_data(){
 
 ec_pdo_entry_reg_t* MOTOR::Domain_regs(uint16_t position){
     ec_pdo_entry_reg_t*  ans= new ec_pdo_entry_reg_t[9]{
-        {EP3ESLAVEPOS,position,MAXSINE, CTRL_WORD, 0, &this->drive_variables.ctrl_word},
-        {EP3ESLAVEPOS,position,MAXSINE, OPERATION_MODE, 0,&this->drive_variables.operation_mode},
-        {EP3ESLAVEPOS,position,MAXSINE, TARGET_VELOCITY, 0,&this->drive_variables.target_velocity},
-        {EP3ESLAVEPOS,position,MAXSINE, TARGET_POSITION, 0,&this->drive_variables.target_postion},
-        {EP3ESLAVEPOS,position,MAXSINE, STATUS_WORD, 0, &this->drive_variables.status_word},
-        {EP3ESLAVEPOS,position,MAXSINE, MODE_DISPLAY, 0, &this->drive_variables.mode_display},
-        {EP3ESLAVEPOS,position,MAXSINE, CURRENT_VELOCITY, 0,&this->drive_variables.current_velocity},
-        {EP3ESLAVEPOS,position,MAXSINE, CURRENT_POSITION, 0,&this->drive_variables.current_postion},
+        {0,position,VenderID,ProductCode, CTRL_WORD, 0, &this->drive_variables.ctrl_word},
+        {0,position,VenderID,ProductCode, OPERATION_MODE, 0,&this->drive_variables.operation_mode},
+        {0,position,VenderID,ProductCode, TARGET_VELOCITY, 0,&this->drive_variables.target_velocity},
+        {0,position,VenderID,ProductCode, TARGET_POSITION, 0,&this->drive_variables.target_postion},
+        {0,position,VenderID,ProductCode, STATUS_WORD, 0, &this->drive_variables.status_word},
+        {0,position,VenderID,ProductCode, MODE_DISPLAY, 0, &this->drive_variables.mode_display},
+        {0,position,VenderID,ProductCode, CURRENT_VELOCITY, 0,&this->drive_variables.current_velocity},
+        {0,position,VenderID,ProductCode, CURRENT_POSITION, 0,&this->drive_variables.current_postion},
         {}
     };
     return ans;

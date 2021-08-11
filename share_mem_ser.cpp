@@ -82,7 +82,7 @@ int main(int argc, char const *argv[])
             //检查从站配置状态
             check_slave_config_states(slaves[i]->slave, &slaves[i]->slave_state);
 
-            slaves[i]->read_data();
+            //slaves[i]->read_data();
 
             #ifdef LOG
                 count++;
@@ -99,7 +99,7 @@ int main(int argc, char const *argv[])
                 }
             #endif
 
-            slaves[i]->send_data();
+            //slaves[i]->send_data();
             
             //发送过程数据
             ecrt_domain_queue(slaves[i]->domain);
@@ -117,3 +117,5 @@ int main(int argc, char const *argv[])
 }
 
 
+
+  

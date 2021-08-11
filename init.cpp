@@ -9,11 +9,14 @@ ec_master_t * init_EtherCAT_slaves(ec_master_t * master,std::vector<SLAVE*> &sla
         else printf("name of %d is %s\n",i,slave_info->name);
         
         if (strcmp(slave_info->name,"EP3E-EC")==0){
-            slaves[i] = new MOTOR;
-            slaves[i]->slave = ecrt_master_slave_config(master, 0,i, MAXSINE);
+            slaves[i] = new MOTOR(0x000007DD,0x00000001);
+            slaves[i]->slave = ecrt_master_slave_config(master, 0,i, 0x000007DD,0x00000001);
         }
-            
-        if (strcmp(slave_info->name,"ECMK-A")==0)
+        else if (strcmp(slave_info->name,"L7N")==0){
+            slaves[i] = new MOTOR(0x00007595,0x00000000);
+            slaves[i]->slave = ecrt_master_slave_config(master, 0,i, 0x00007595,0x00000000);
+        }
+        else if (strcmp(slave_info->name,"ECMK-A")==0)
         {
             slaves[i] = new ECMK;
             slaves[i]->slave = ecrt_master_slave_config(master, 0,i, ECMKCODE);

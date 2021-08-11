@@ -39,7 +39,7 @@
 
 //从站配置所用的参数
 #define EP3ESLAVEPOS 0              //迈信伺服EP3E在ethercat总线上的位置
-#define MAXSINE 0x000007DD, 0x00000001  // EP3E的厂家标识和产品标识
+//#define MAXSINE 0x000007DD, 0x00000001  // EP3E的厂家标识和产品标识
 
 // CoE对象字典
 #define RXPDO 0x1600
@@ -82,6 +82,14 @@ public:
         homeBusy = true;
         powerBusy = true;
     }
+    MOTOR(unsigned int venderID,unsigned int productCode){
+        VenderID = venderID;
+        ProductCode = productCode;
+        targetPosition = 0;
+        opModeSet = 8;     //位置模式
+        homeBusy = true;
+        powerBusy = true;
+    }
     struct DRIVERVARIABLE drive_variables;  //从站驱动器变量
 
     int32_t targetPosition;   //电机的目标位置
@@ -103,6 +111,8 @@ public:
     bool homeBusy;        //回零标志位
     bool positionMoving;  //位置模式下运动
 
+    unsigned int VenderID;
+    unsigned int ProductCode;
     void read_data();
     void send_data();
     ec_pdo_entry_reg_t *Domain_regs(uint16_t position);
