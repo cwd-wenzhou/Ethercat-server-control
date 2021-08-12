@@ -88,15 +88,16 @@ ec_pdo_entry_reg_t *ECMK::Domain_regs(uint16_t position){
 }
 
 void ECMK::read_data(){
+    
+    this->CHx_Current[0] = (float)EC_READ_REAL(this->domain_pd+this->pdo_offset.CHx_Current[0]);
+    this->CHx_Current[1] = (float)EC_READ_REAL(this->domain_pd+this->pdo_offset.CHx_Current[1]);
+    this->CHx_Current[2] = (float)EC_READ_REAL(this->domain_pd+this->pdo_offset.CHx_Current[2]);
+    this->CHx_Current[3] = (float)EC_READ_REAL(this->domain_pd+this->pdo_offset.CHx_Current[3]);
+    //this->CHx_Displacement[0] = EC_READ_S16(this->domain_pd+this->pdo_offset.CHx_Displacement[0]);
+    //this->CHx_Displacement[1] = EC_READ_S16(this->domain_pd+this->pdo_offset.CHx_Displacement[1]);
+    //this->CHx_Displacement[2] = EC_READ_S16(this->domain_pd+this->pdo_offset.CHx_Displacement[2]);
+    //this->CHx_Displacement[3] = EC_READ_S16(this->domain_pd+this->pdo_offset.CHx_Displacement[3]);
     /*
-    this->CHx_Current[0] = EC_READ_S32(this->domain_pd+this->pdo_offset.CHx_Current[0]);
-    this->CHx_Current[1] = EC_READ_S32(this->domain_pd+this->pdo_offset.CHx_Current[1]);
-    this->CHx_Current[2] = EC_READ_S32(this->domain_pd+this->pdo_offset.CHx_Current[2]);
-    this->CHx_Current[3] = EC_READ_S32(this->domain_pd+this->pdo_offset.CHx_Current[3]);
-    this->CHx_Displacement[0] = EC_READ_S16(this->domain_pd+this->pdo_offset.CHx_Displacement[0]);
-    this->CHx_Displacement[1] = EC_READ_S16(this->domain_pd+this->pdo_offset.CHx_Displacement[1]);
-    this->CHx_Displacement[2] = EC_READ_S16(this->domain_pd+this->pdo_offset.CHx_Displacement[2]);
-    this->CHx_Displacement[3] = EC_READ_S16(this->domain_pd+this->pdo_offset.CHx_Displacement[3]);
     printf("CH1_Current=%f   CH2_Current=%f   CH3_Current=%f   CH4_Current=%f\n"
     ,CHx_Current[0],CHx_Current[1],CHx_Current[2],CHx_Current[3]);
     */
@@ -105,3 +106,9 @@ void ECMK::read_data(){
 void ECMK::send_data(){
     //empty function;
 }
+
+void ECMK::print(){
+    printf("CH1_Current=%lf   CH2_Current=%lf   CH3_Current=%lf   CH4_Current=%lf\n"
+    ,this->CHx_Current[0],this->CHx_Current[1],this->CHx_Current[2],this->CHx_Current[3]);
+}
+

@@ -45,6 +45,13 @@ void MOTOR::send_data(){
         }
 }
 
+void MOTOR::print(){
+    printf("currentPosition=%d  currenttorque=%d  currentVelocity=%d\n",
+        this->currentPosition,this->currenttorque,this->currentVelocity);
+    printf("targetPosition=%d  targettorque=%d  targetVelocity=%d\n",
+        this->targetPosition,this->targettorque,this->targetVelocity);
+}
+
 ec_pdo_entry_reg_t* MOTOR::Domain_regs(uint16_t position){
     ec_pdo_entry_reg_t*  ans= new ec_pdo_entry_reg_t[9]{
         {0,position,VenderID,ProductCode, CTRL_WORD, 0, &this->drive_variables.ctrl_word},

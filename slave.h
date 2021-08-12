@@ -5,6 +5,7 @@
  * 该头文件建立符合igh的从站slave类，加入用户定制的类一律需要继承该类。
  * 
  */
+#include <iostream>
 #ifndef SLAVE_DEF
 #define SLAVE_DEF
 class SLAVE{
@@ -20,6 +21,7 @@ public:
 
     virtual void read_data();
     virtual void send_data();
+    virtual void print();
     virtual ec_pdo_entry_reg_t *Domain_regs(uint16_t position);
     virtual ec_sync_info_t* get_ec_sync_info_t_();
 

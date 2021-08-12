@@ -54,7 +54,7 @@ int main(int argc, char const *argv[])
     
     running = true;
     printf("*It's working now*\n");
-
+    int count=0;
 
     //创建ethercat主站master
     ec_master_t * master = Ecrt_request_master(0);
@@ -82,24 +82,27 @@ int main(int argc, char const *argv[])
             //检查从站配置状态
             check_slave_config_states(slaves[i]->slave, &slaves[i]->slave_state);
 
-            //slaves[i]->read_data();
-
-            #ifdef LOG
+            slaves[i]->read_data();
+  
+            //#ifdef LOG
                 count++;
                 if (count>1000){
                     count=0;
-                    Log_Info(Status_Check_char(motor->status));
-                    Log_Info_All(*motor);
-
+                    slaves[i]->print();
+                    //Log_Info(Status_Check_char(motor->status));
+                    //Log_Info_All(*motor);
+        
                 }
+            /*
                 if (Is_Serevr_On(motor) && !powerup)
                 {
                     powerup = true;
                     Log_Info("========== Server Power up ==========")
                 }
-            #endif
+            */
+            //#endif
 
-            //slaves[i]->send_data();
+            slaves[i]->send_data();
             
             //发送过程数据
             ecrt_domain_queue(slaves[i]->domain);
@@ -118,4 +121,4 @@ int main(int argc, char const *argv[])
 
 
 
-  
+     

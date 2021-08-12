@@ -41,13 +41,14 @@ public:
     struct PDO_OFFSET pdo_offset;  //从站驱动器变量
 
     unsigned int CHx_Displacement[4];   //4通道位移值
-    double CHx_Current[4];        //4通道电流值
+    float CHx_Current[4];        //4通道电流值
     char product_name[20];
     char Hardware_Version[20];
     char Software_Version[20];
 
     void read_data();
     void send_data();
+    void print();
     ec_pdo_entry_reg_t *Domain_regs(uint16_t position);
     ec_sync_info_t* get_ec_sync_info_t_();
     ~ECMK(){};

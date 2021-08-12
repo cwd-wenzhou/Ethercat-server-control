@@ -115,6 +115,7 @@ public:
     unsigned int ProductCode;
     void read_data();
     void send_data();
+    void print();
     ec_pdo_entry_reg_t *Domain_regs(uint16_t position);
     ec_sync_info_t* get_ec_sync_info_t_();
 
