@@ -13,6 +13,7 @@
 #include <sys/stat.h>        /* For mode constants */
 #include <fcntl.h>              /* For O_* constants */
 #include <unistd.h>
+#include <time.h>          //nanosleep
 #include "shm_ect.h"
 #include "log/log.h"
 #include "sig.h"
@@ -22,7 +23,12 @@
 using namespace std;
 
 //#define LOG
-;
+void nanoSecondFieldConversion(struct timespec &t){
+    if (t.tv_nsec>999999999){
+        t.tv_sec+=1;
+        t.tv_nsec -=1000000000;
+    }
+}
 bool running;
 void close_sig_handler(int sig){
     running = false;
@@ -67,9 +73,24 @@ int main(int argc, char const *argv[])
 
     init_EtherCAT_slaves(master,slaves);
     printf("ethercat master init successed!\n");
+
+    /* Get current time and compute the next nanosleeptime */
+    struct timespec nextnanosleeptime;
+    clock_gettime(CLOCK_REALTIME, &nextnanosleeptime);
+    /* Variable to nano Sleep until SECONDS_SLEEP second boundary */
+    nextnanosleeptime.tv_nsec += 250000;
+    nanoSecondFieldConversion(nextnanosleeptime);
+    struct timespec gap;
+    gap.tv_nsec = 150000;
     int powerup=false;
     while (running){
-        usleep(1000);
+        clock_nanosleep(CLOCK_REALTIME, TIMER_ABSTIME, &nextnanosleeptime, NULL);
+        //clock_gettime(CLOCK_TAI, &nextnanosleeptime);
+        /* Variable to nano Sleep until SECONDS_SLEEP second boundary */
+        nextnanosleeptime.tv_nsec += 150000;
+        nanoSecondFieldConversion(nextnanosleeptime);
+        //nanosleep(&gap,nullptr);
+        //usleep(1000);
         //接收过程数据
         ecrt_master_receive(master);
         for (int i=0;i< slave_count;i++){
@@ -83,26 +104,25 @@ int main(int argc, char const *argv[])
             check_slave_config_states(slaves[i]->slave, &slaves[i]->slave_state);
 
             slaves[i]->read_data();
-  
-            //#ifdef LOG
+            
+            #ifdef LOG
                 count++;
-                if (count>1000){
+                if (count>20){
                     count=0;
                     slaves[i]->print();
                     //Log_Info(Status_Check_char(motor->status));
                     //Log_Info_All(*motor);
         
                 }
-            /*
+            
                 if (Is_Serevr_On(motor) && !powerup)
                 {
                     powerup = true;
                     Log_Info("========== Server Power up ==========")
                 }
-            */
-            //#endif
+            #endif
 
-            slaves[i]->send_data();
+            //slaves[i]->send_data();
             
             //发送过程数据
             ecrt_domain_queue(slaves[i]->domain);
